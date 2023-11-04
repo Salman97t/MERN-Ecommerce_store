@@ -7,7 +7,8 @@ const productSchema= new mongoose.Schema({
         required:[true,"Please Enter Name for product"],
         trim:true
     },
-    descrption:{
+    description
+    :{
         type:String,
         required:[true,"Please Enter Description for product"],
     },
@@ -66,4 +67,4 @@ const productSchema= new mongoose.Schema({
         default:Date.now
     }
 })
-export default mongoose.model("product",productSchema);
+export default mongoose.model("Product",productSchema);
