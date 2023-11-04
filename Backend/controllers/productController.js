@@ -19,7 +19,30 @@ res.status(200).json({
     products
 });
 }
+
+// Update product --Admin
+const updateProduct = async (req,res,next)=>{
+    let product = await productModel.findById(req.params.id);
+
+    if(!product){
+        return res.status(500).json({
+            success:false,
+            message:"Product not found"
+        })
+    }
+    product = await productModel.findByIdAndUpdate(req.params.id, req.body, {
+        new:true, 
+        runValidators: true,
+         useFindAndModify:false
+        })
+        res.status(200).json({
+            success:true,
+            product
+        })
+    }
+
 export default { 
     getAllProducts, 
-    createProduct
+    createProduct,
+    updateProduct
 }
