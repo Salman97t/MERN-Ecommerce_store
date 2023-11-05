@@ -1,4 +1,5 @@
 import productModel from "../models/productModel.js";
+import ErrorHander from "../utils/errorhander.js";
 
  
 //create product   --For Admin
@@ -55,7 +56,19 @@ const updateProduct = async (req,res,next)=>{
                 message:"Product delete successfully"
             })
         }
+        // Get Single product details
+        const getSingleProduct = async (req, res, next)=>{
+    const product = await productModel.findById(req.params.id);
+    if(!product){
+        return next(new ErrorHander("Prodcut not found",404));
+    }
 
+    res.status(200).json({
+        success:true,
+        product
+    })
+
+}
 
 
 
@@ -63,5 +76,6 @@ export default {
     getAllProducts, 
     createProduct,
     updateProduct,
-    deleteProduct
+    deleteProduct,
+    getSingleProduct
 }
