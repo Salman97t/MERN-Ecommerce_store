@@ -6,7 +6,7 @@ const createProduct= async (req, res, next)=>{
         const product =await productModel.create(req.body);
         res.status(201).json({
             success:true,
-            addProduct
+            product
         })
 }
 
@@ -40,9 +40,28 @@ const updateProduct = async (req,res,next)=>{
             product
         })
     }
+// Delete prodcut --Admin
+        const deleteProduct = async (req,res,next)=>{
+            const product = await productModel.findById(req.params.id);
+            if(!product){
+                return res.status(500).json({
+                    success:false,
+                    message:"Product not found"
+                })
+            }
+            await product.deleteOne();
+            res.status(200).json({
+                success:true,
+                message:"Product delete successfully"
+            })
+        }
+
+
+
 
 export default { 
     getAllProducts, 
     createProduct,
-    updateProduct
+    updateProduct,
+    deleteProduct
 }

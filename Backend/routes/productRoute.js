@@ -5,6 +5,6 @@ const Route= Router();
 
 Route.route("/products").get(productController.getAllProducts)
 Route.route("/product/new").post(productController.createProduct)
-Route.route("/product/:id").put(productController.updateProduct)
+Route.route("/product/:id").put(productController.updateProduct).delete(productController.deleteProduct)
 
 export default Route;
