@@ -1,28 +1,29 @@
 import productModel from "../models/productModel.js";
 import ErrorHander from "../utils/errorhander.js";
+import catchAsynchError from "../middleware/catchAsynchError.js"
 
   
 //create product   --For Admin
-const createProduct= async (req, res, next)=>{
-        const product =await productModel.create(req.body);
-        res.status(201).json({
-            success:true,
-            product
-        })
-}
+const createProduct= catchAsynchError(async (req, res, next)=>{
+    const product =await productModel.create(req.body);
+    res.status(201).json({
+        success:true,
+        product
+    })
+})
 
 
 // Get all products
-const getAllProducts=async (req, res)=>{
+const getAllProducts= catchAsynchError(async (req, res)=>{
     const products= await productModel.find()
 res.status(200).json({
     success:true,
     products
 });
-}
+})
 
 // Update product --Admin
-const updateProduct = async (req,res,next)=>{
+const updateProduct = catchAsynchError(async (req,res,next)=>{
     let product = await productModel.findById(req.params.id);
 
     if(!product){
@@ -38,9 +39,9 @@ const updateProduct = async (req,res,next)=>{
             success:true,
             product
         })
-    }
+    })
 // Delete prodcut --Admin
-        const deleteProduct = async (req,res,next)=>{
+        const deleteProduct = catchAsynchError(async (req,res,next)=>{
             const product = await productModel.findById(req.params.id);
             if(!product){
                 return next(new ErrorHander("Prodcut not found",404));
@@ -50,9 +51,9 @@ const updateProduct = async (req,res,next)=>{
                 success:true,
                 message:"Product delete successfully"
             })
-        }
+        })
         // Get Single product details
-        const getSingleProduct = async (req, res, next)=>{
+        const getSingleProduct = catchAsynchError(async (req, res, next)=>{
     const product = await productModel.findById(req.params.id);
     if(!product){
         return next(new ErrorHander("Prodcut not found",404));
@@ -63,7 +64,7 @@ const updateProduct = async (req,res,next)=>{
         product
     })
 
-}
+})
 
 
 
