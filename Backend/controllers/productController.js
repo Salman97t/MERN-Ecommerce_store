@@ -1,7 +1,7 @@
 import productModel from "../models/productModel.js";
 import ErrorHander from "../utils/errorhander.js";
 
- 
+  
 //create product   --For Admin
 const createProduct= async (req, res, next)=>{
         const product =await productModel.create(req.body);
@@ -26,10 +26,8 @@ const updateProduct = async (req,res,next)=>{
     let product = await productModel.findById(req.params.id);
 
     if(!product){
-        return res.status(500).json({
-            success:false,
-            message:"Product not found"
-        })
+        return next(new ErrorHander("Prodcut not found",404));
+
     }
     product = await productModel.findByIdAndUpdate(req.params.id, req.body, {
         new:true, 
@@ -45,10 +43,7 @@ const updateProduct = async (req,res,next)=>{
         const deleteProduct = async (req,res,next)=>{
             const product = await productModel.findById(req.params.id);
             if(!product){
-                return res.status(500).json({
-                    success:false,
-                    message:"Product not found"
-                })
+                return next(new ErrorHander("Prodcut not found",404));
             }
             await product.deleteOne();
             res.status(200).json({
