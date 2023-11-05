@@ -2,6 +2,15 @@ import app from './app.js';
 import dotenv from 'dotenv';
 import connectDB from './config/database.js';
 
+
+//handling uncaught errors
+process.on("uncaughtException",(err)=>{
+    console.log(`Error:${err.message}`)
+    console.log(`Shutting down server due to unhandled uncaught errors`)
+    process.exit(1);
+})
+
+//configuring dot env
 dotenv.config({path:"backend/config/config.env"});
 
 //connecting to database
