@@ -1,6 +1,7 @@
 import productModel from "../models/productModel.js";
 import ErrorHander from "../utils/errorhander.js";
 import catchAsynchError from "../middleware/catchAsynchError.js"
+import ApiFeatures from "../utils/apiFeatures.js";
 
   
 //create product   --For Admin
@@ -15,7 +16,9 @@ const createProduct= catchAsynchError(async (req, res, next)=>{
 
 // Get all products
 const getAllProducts= catchAsynchError(async (req, res)=>{
-    const products= await productModel.find()
+    const apiFeature = new ApiFeatures(productModel.find(),req.query).search().filter();
+    const products= await apiFeature.query;
+
 res.status(200).json({
     success:true,
     products
