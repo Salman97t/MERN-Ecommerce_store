@@ -1,7 +1,9 @@
 import mongoose from "mongoose";
 import validator from "validator";
-//import isEmail from "validator/lib/isemail";
+import bcrypt from "bcrypt";
 
+
+const isEmail = validator.isEmail;
 
 const userSchema = new mongoose.Schema({
     name:{
@@ -13,7 +15,7 @@ const userSchema = new mongoose.Schema({
     email:{
         type:String,
         required: [true, "Please Enter your email"],
-        validate:[validator,isEmail, "Please enter a valid email"]
+        validate:[isEmail, "Please enter a valid email"]
     },
     password:{
         type:String,
@@ -37,6 +39,11 @@ const userSchema = new mongoose.Schema({
       },
       restPasswordToken:String,
       restPasswordExpire:Date,
-
+})
+userSchema.pre("save",async function(next){
+    if(this.isModified("password")){
+        next();
+    }
+    this.password = await bcrypt.hash(this.password,10)
 })
 export default mongoose.model("User",userSchema);
