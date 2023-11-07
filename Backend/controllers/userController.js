@@ -36,8 +36,21 @@ const loginUser = catchAsynchError(async(req,res,next)=>{
 
         sendToken(user,200,res);
 })
+// Logout 
+
+const logout = catchAsynchError(async(req,res,next)=>{
+    res.cookie("token", null,{
+        expires: new Date(Date.now()),
+        httpOnly:true,
+    })
+    res.status(200).json({
+        success: true,
+        message:"Logged Out"
+    })
+})
 
 export default {
     registerUser,
-    loginUser
+    loginUser,
+    logout
 };
