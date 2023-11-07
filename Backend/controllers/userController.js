@@ -1,6 +1,8 @@
 import ErrorHander from "../utils/errorhander.js";
 import catchAsynchError from "../middleware/catchAsynchError.js";
 import usersModel from "../models/usersModel.js";
+import sendToken from "../utils/jwtToken.js";
+
 
 
 // Register user 
@@ -13,12 +15,7 @@ import usersModel from "../models/usersModel.js";
                     url:"profile pic url"
                 }
             });
-
-            const token = registerUser.getJWTToken()
-            res.status(201).json({
-                success:true,
-                token,
-            })
+            sendToken(user,201,res);
         });
 
 // Login User
@@ -27,15 +24,17 @@ const loginUser = catchAsynchError(async(req,res,next)=>{
             if(!email||!password){
                 return next(new ErrorHander("Password or Email Missing", 400))
             }
-            const user = usersModel.findOne({email}).select("+password");
+            const user = await usersModel.findOne({email}).select("+password");
             if(!user){
                 return next(new ErrorHander("Invalid email or password",401));
             }
-            const isPasswordMatched = user.comparePassword();
+            const isPasswordMatched = await user.comparePassword(password);
             
             if(!isPasswordMatched){
                 return next(new ErrorHander("Invalid email or password",401));
             }
+
+        sendToken(user,200,res);
 })
 
 export default {
