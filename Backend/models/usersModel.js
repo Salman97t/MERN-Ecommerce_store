@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import validator from "validator";
 import bcrypt from "bcrypt";
+import { Jwt } from "jsonwebtoken";
 
 
 const isEmail = validator.isEmail;
@@ -46,4 +47,12 @@ userSchema.pre("save",async function(next){
     }
     this.password = await bcrypt.hash(this.password,10)
 })
+
+//JWT Token
+userSchema.methods.getJWTToken = function (){
+    return jwt.sign({id:this._id}, process.env.JWT_SECRET,{
+        expiresIn: process.env.JWT_EXPIRE,
+    });
+};
+
 export default mongoose.model("User",userSchema);

@@ -13,10 +13,32 @@ import usersModel from "../models/usersModel.js";
                     url:"profile pic url"
                 }
             });
+
+            const token = registerUser.getJWTToken()
             res.status(201).json({
                 success:true,
-                user
+                token,
             })
         });
 
-export default {registerUser};
+// Login User
+const loginUser = catchAsynchError(async(req,res,next)=>{
+            const {email, password} = req.body;
+            if(!email||!password){
+                return next(new ErrorHander("Password or Email Missing", 400))
+            }
+            const user = usersModel.findOne({email}).select("+password");
+            if(!user){
+                return next(new ErrorHander("Invalid email or password",401));
+            }
+            const isPasswordMatched = user.comparePassword();
+            
+            if(!isPasswordMatched){
+                return next(new ErrorHander("Invalid email or password",401));
+            }
+})
+
+export default {
+    registerUser,
+    loginUser
+};
