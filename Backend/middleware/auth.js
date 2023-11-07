@@ -12,5 +12,13 @@ const isAuthUser = catchAsynchErrors( async (req,res,next)=>{
     req.user = await usersModel.findById(decodeData.id);
     next();
 })
+const authorizedRoles = (...roles) =>{
+    return (req,res,next)=>{
+        if(!roles.includes(req.user.role)){
+           return next( new ErrorHander(`Role: ${req.user.role} is not allowed to access this resource`,403));
+        }
+        next();
+    }
+}
 
-export default isAuthUser;
+export default {isAuthUser,authorizedRoles};
