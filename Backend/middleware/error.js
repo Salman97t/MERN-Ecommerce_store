@@ -17,12 +17,12 @@ import errorhandler from "../utils/errorhander.js";
             err = new errorhandler(message,400)
         }
         // Json web token error
-        if(err.code === "JsonWebTokenError"){
-            const message = "Json Web Token is invalid. Try again!";
+        if(err.name === "JsonWebTokenError"){
+            const message = "Json Web Token is invalid, Try again!";
             err = new errorhandler(message,400)
         }
         // JWT token expire
-        if(err.code === "TokenExpireError"){
+        if(err.name === "TokenExpiredError"){
             const message = "Json Web Token is expired. Try again!";
             err = new errorhandler(message,400)
         }

@@ -8,7 +8,7 @@ const isAuthUser = catchAsynchErrors( async (req,res,next)=>{
     if(!token){
         return next(new ErrorHander("Please Login to access this resource",401))
     }
-    const decodeData = Jwt.verify(token,process.env.JWT_SECRET);
+    const decodeData = Jwt.verify( token , process.env.JWT_SECRET);
     req.user = await usersModel.findById(decodeData.id);
     next();
 })

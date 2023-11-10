@@ -106,10 +106,20 @@ const restPassword = catchAsynchError(async(req,res,next)=>{
     sendToken(user,200,res);
 })
 
+// Get User detail
+const getUserDetails= catchAsynchError(async (req,res,next)=>{
+    const user = await usersModel.findById(req.user.id);
+    res.status(200).json({
+        success:true,
+        user
+    })
+})
+
 export default {
     registerUser,
     loginUser,
     logout,
     forgetPassword,
-    restPassword
+    restPassword,
+    getUserDetails
 };
