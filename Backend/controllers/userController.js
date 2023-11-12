@@ -114,6 +114,102 @@ const getUserDetails= catchAsynchError(async (req,res,next)=>{
         user
     })
 })
+// Update user password
+const updatePassword = catchAsynchError(async (req,res,next)=>{
+    const user = await usersModel.findById(req.user.id).select("+password");
+    const isPasswordMatched = await user.comparePassword(req.body.oldPassword);
+            if(!isPasswordMatched){
+                return next(new ErrorHander("Old password is incorrect",401));
+            }
+            if(req.body.newPassword !== req.body.confirmPassword){
+                return next(new ErrorHander("Password does not matched",401));
+            }
+            user.password = req.body.newPassword
+            await user.save();
+            sendToken(user, 200,res);
+})
+// Update User Profile
+const updateProfile = catchAsynchError(async (req,res,next)=>{
+
+    const newUserData ={ 
+        name:req.body.name,
+        email:req.body.email,
+
+    } 
+    // iamge update later
+    const user =await usersModel.findByIdAndUpdate(req.user.id,newUserData,{
+        new:true,
+        runValidators:true,
+        useFindAndModify:false
+    })
+        res.status(200).json({
+            success:true,
+        })
+})
+
+// Get all registered users Details (Admin only)
+const getRegisteredUser = catchAsynchError( async (req, res,next)=>{
+    const users = await usersModel.find();
+    res.status(200).json({
+        success:true,
+        users
+    })
+})
+//Get Single User Detail (Admin)
+const getSingleUser = catchAsynchError(async (req,res,next)=>{ 
+    const user =await usersModel.findById(req.params.id);
+
+    if(!user){
+        return next (new ErrorHander(`User does not exist with the id : ${req.params.id }`))
+    }
+    
+    res.status(200).json({
+        success:true,
+        user
+    })
+})
+
+// update User Role -- Admin
+const updateUserRole = catchAsynchError(async (req, res, next) => {
+    const newUserData = {
+      name: req.body.name,
+      email: req.body.email,
+      role: req.body.role,
+    };
+  
+    await usersModel.findByIdAndUpdate(req.params.id, newUserData, {
+      new: true,
+      runValidators: true,
+      useFindAndModify: false,
+    });
+  
+    res.status(200).json({
+      success: true,
+    });
+  });
+  //Delete User --Admin
+  const deleteUser = catchAsynchError(async (req, res, next) => {
+    const user = await usersModel.findById(req.params.id);
+  
+    if (!user) {
+      return next(
+        new ErrorHander(`User does not exist with Id: ${req.params.id}`, 400)
+      );
+    }
+  
+    // const imageId = user.avatar.public_id;
+  
+    // await cloudinary.v2.uploader.destroy(imageId);
+  
+    await user.deleteOne();
+  
+    res.status(200).json({
+      success: true,
+      message: "User Deleted Successfully",
+    });
+  });
+
+
 
 export default {
     registerUser,
@@ -121,5 +217,11 @@ export default {
     logout,
     forgetPassword,
     restPassword,
-    getUserDetails
+    getUserDetails,
+    updatePassword,
+    updateProfile,
+    getRegisteredUser,
+    getSingleUser,
+    updateUserRole,
+    deleteUser
 };
