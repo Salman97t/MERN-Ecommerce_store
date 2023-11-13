@@ -12,5 +12,7 @@ router
 .delete(auth.isAuthUser,auth.authorizedRoles("admin"),productController.deleteProduct);
 
 router.route("/product/:id").get(productController.getSingleProduct);
+router.route("/review").put(auth.isAuthUser,productController.createProductReview);
+router.route("/reviews").get(productController.getProductReviews).delete(auth.isAuthUser,productController.deleteReview)
 
 export default router;
