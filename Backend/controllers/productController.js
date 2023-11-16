@@ -2,11 +2,31 @@ import productModel from "../models/productModel.js";
 import ErrorHander from "../utils/errorhander.js";
 import catchAsynchError from "../middleware/catchAsynchError.js"
 import ApiFeatures from "../utils/apiFeatures.js";
+import cloudinary from "cloudinary";
 
   
 //create product   --For Admin
 const createProduct= catchAsynchError(async (req, res, next)=>{
 
+
+  let images = [];
+  if(typeof req.body.images=== "string"){
+    images.push(req.body.images)
+  }
+  else{
+    images = req.body.images;
+  }
+  const imagesLink = [];
+  for (let i = 0; i < images.length; i++) {
+    const result = await cloudinary.v2.uploader.upload(images[i],{
+      folder:"products"
+    })
+    imagesLink.push({
+      public_id:result.public_id,
+      url:result.secure_url
+    })
+  }
+    req.body.images = imagesLink; 
     req.body.user = req.user.id;
     
     const product =await productModel.create(req.body);
@@ -18,17 +38,25 @@ const createProduct= catchAsynchError(async (req, res, next)=>{
 
 
 // Get all products
-const getAllProducts= catchAsynchError(async (req, res)=>{
-
-    const resultPerPage = 10;
-    const productCount = await productModel.countDocuments();
+const getAllProducts= catchAsynchError(async (req, res,next)=>{
+    const resultPerPage = 8;
+    const productsCount = await productModel.countDocuments();
     const apiFeature = new ApiFeatures(productModel.find(),req.query)
-    .search().filter().pagination(resultPerPage)
-    const products= await apiFeature.query;
+    .search().filter()
+
+    let products = await apiFeature.query;
+
+    let filteredProductsCount = products.length;
+    apiFeature.pagination(resultPerPage);
+
+    products= await apiFeature.query;
 
 res.status(200).json({
     success:true,
-    products
+    products,
+    productsCount,
+    resultPerPage,
+    filteredProductsCount
 });
 })
 
@@ -38,8 +66,36 @@ const updateProduct = catchAsynchError(async (req,res,next)=>{
 
     if(!product){
         return next(new ErrorHander("Prodcut not found",404));
-
     }
+//  Images start here
+      let images = [];
+      if(typeof req.body.images=== "string"){
+        images.push(req.body.images)
+      }
+      else{
+        images = req.body.images;
+      }
+
+      if(images !== undefined ){
+        // Deleting Images from cloudinary
+
+        for (let i = 0; i < product.images.length; i++) {
+              
+          await cloudinary.v2.uploader.destroy(product.images[i].public_id) 
+       }
+       const imagesLink = [];
+      for (let i = 0; i < images.length; i++) {
+      const result = await cloudinary.v2.uploader.upload(images[i],{
+      folder:"products"
+    })
+    imagesLink.push({
+      public_id:result.public_id,
+      url:result.secure_url
+    })
+  }
+  req.body.images = imagesLink;
+      }
+
     product = await productModel.findByIdAndUpdate(req.params.id, req.body, {
         new:true, 
         runValidators: true,
@@ -56,6 +112,15 @@ const updateProduct = catchAsynchError(async (req,res,next)=>{
             if(!product){
                 return next(new ErrorHander("Prodcut not found",404));
             }
+
+// Deleting Images from cloudinary
+
+            for (let i = 0; i < product.images.length; i++) {
+              
+               await cloudinary.v2.uploader.destroy(product.images[i].public_id)
+              
+            }
+
             await product.deleteOne();
             res.status(200).json({
                 success:true,
@@ -72,7 +137,6 @@ const updateProduct = catchAsynchError(async (req,res,next)=>{
     res.status(200).json({
         success:true,
         product,
-        productCount
     })
 
 })
@@ -178,6 +242,14 @@ const getProductReviews = catchAsynchError(async (req, res, next) => {
     });
   });
 
+  // Get all products (Admin)
+const getAdminProducts= catchAsynchError(async (req, res,next)=>{
+const products = await productModel.find();
+res.status(200).json({
+  success: true,
+  products
+});
+})
 
 
 
@@ -189,5 +261,6 @@ export default {
     getSingleProduct,
     createProductReview,
     getProductReviews,
-    deleteReview
+    deleteReview,
+    getAdminProducts
 }

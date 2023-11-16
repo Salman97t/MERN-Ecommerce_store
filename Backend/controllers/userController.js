@@ -4,17 +4,22 @@ import usersModel from "../models/usersModel.js";
 import sendToken from "../utils/jwtToken.js";
 import sendEmail from "../utils/sendEmail.js";
 import crypto from "crypto";
-
+import cloudinary from "cloudinary";
 
 
 // Register user 
     const registerUser = catchAsynchError(async(req,res,next)=>{
+        const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar,{
+            folder: "avatars",
+            width:150,
+            crop:"scale",
+        });
             const {name, email, password} =req.body;
             const user = await usersModel.create({
                 name, email, password,
                 avatar:{
-                    public_id: "Profile Pic Id",
-                    url:"profile pic url"
+                    public_id: myCloud.public_id,
+                    url:myCloud.secure_url
                 }
             });
             sendToken(user,201,res);
@@ -136,7 +141,22 @@ const updateProfile = catchAsynchError(async (req,res,next)=>{
         email:req.body.email,
 
     } 
-    // iamge update later
+    
+    if(req.body.avatar !==""){
+        const user = await usersModel.findById(req.body.id);
+        const imageId = user.avatar.public_id;
+        await cloudinary.v2.uploader.destroy(imageId)
+        const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar,{
+            folder: "avatars",
+            width:150,
+            crop:"scale",
+        });
+        newUserData.avatar ={
+            public_id:myCloud.public_id,
+            url: myCloud.secure_url,
+        }
+    }
+
     const user =await usersModel.findByIdAndUpdate(req.user.id,newUserData,{
         new:true,
         runValidators:true,
@@ -197,9 +217,9 @@ const updateUserRole = catchAsynchError(async (req, res, next) => {
       );
     }
   
-    // const imageId = user.avatar.public_id;
+    const imageId = user.avatar.public_id; 
   
-    // await cloudinary.v2.uploader.destroy(imageId);
+    await cloudinary.v2.uploader.destroy(imageId);
   
     await user.deleteOne();
   
